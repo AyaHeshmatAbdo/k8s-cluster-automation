@@ -12,6 +12,8 @@
 - name: Install Kubernetes Master
   hosts: kube_master
   become: yes
+  vars:
+    kubernetes_allow_pods_on_control_plane: true
   roles:
     - geerlingguy.kubernetes
 
