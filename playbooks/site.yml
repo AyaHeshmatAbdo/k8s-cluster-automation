@@ -1,0 +1,22 @@
+---
+- name: Setup Kubernetes Cluster
+  hosts: all
+  become: yes
+  vars:
+    kubernetes_version: "1.28.0"
+    containerd_version: "1.8.6"
+    kubernetes_allow_pods_on_master: true
+  roles:
+    - geerlingguy.containerd
+
+- name: Install Kubernetes Master
+  hosts: kube_master
+  become: yes
+  roles:
+    - geerlingguy.kubernetes
+
+- name: Install Kubernetes Worker Nodes
+  hosts: kube_workers
+  become: yes
+  roles:
+    - geerlingguy.kubernetes
