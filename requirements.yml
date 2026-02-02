@@ -1,4 +1,3 @@
 ---
-- src: geerlingguy.containerd
-- src: geerlingguy.kubernetes
+- src: TalhaJuikar.kubernetes
 
