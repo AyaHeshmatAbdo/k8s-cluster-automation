@@ -3,20 +3,44 @@
   hosts: all
   become: yes
   vars:
-    kubernetes_allow_pods_on_master: true
-  roles:
-    - geerlingguy.containerd
-
-- name: Install Kubernetes Master
-  hosts: kube_master
-  become: yes
-  vars:
     kubernetes_allow_pods_on_control_plane: true
   roles:
-    - geerlingguy.kubernetes
-
-- name: Install Kubernetes Worker Nodes
-  hosts: kube_workers
-  become: yes
+    - geerlingguy.containerd
+    
+- name: Setup Kubernetes control plane
+  hosts: kube_master
+  become: true
+  vars:
+    kubernetes_role: control_plane
   roles:
     - geerlingguy.kubernetes
+
+  tasks:
+    - name: Generate kubeadm join command
+      command: kubeadm token create --print-join-command
+      register: join_output
+      changed_when: false
+
+    - name: Save join command
+      set_fact:
+        kubernetes_join_command: "{{ join_output.stdout }}"
+
+- name: Setup Kubernetes workers
+  hosts: kube_worker
+  become: true
+  vars:
+    kubernetes_role: node
+    kubernetes_join_command: "{{ hostvars[groups['kube_master'][0]].kubernetes_join_command }}"
+
+  # Optional debug
+  tasks:
+    - name: Debug join command
+      debug:
+        var: kubernetes_join_command
+
+  roles:
+    - geerlingguy.kubernetes
+
+
+
+
